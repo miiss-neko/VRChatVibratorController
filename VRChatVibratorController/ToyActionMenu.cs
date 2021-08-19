@@ -18,7 +18,7 @@ namespace Vibrator_Controller {
         private static int[] available_purcent = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         private static Dictionary<int, Texture2D> purcent_icons = new Dictionary<int, Texture2D>();
 
-        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max" };
+        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max", "Diamo" };
         private static Dictionary<string, Texture2D> toy_icons = new Dictionary<string, Texture2D>();
 
         private static ActionMenuAPI actionMenuApi;
@@ -121,18 +121,15 @@ namespace Vibrator_Controller {
                         PercentageMenu(toy, purcent, purcent_icons[purcent]);
                     }
                 });
-            }, $"{toy.name}: {toy.lastSpeed * 10}%", toy_icons[toy.name]);
+            }, $"{toy.name}: {toy.lastSpeed}%", toy_icons[toy.name]);
         }
 
         private static void VibrateRadial(Toy toy, string text = "") {
             AMAPI.AddRadialPedalToSubMenu(text,
                 f => {
                     int roundedPercent = (int)Math.Round(f * 100);
-
-                    if (toy.lastSpeed != roundedPercent / 10) {
-                        toy.setSpeed(roundedPercent / 10);
-                    }
-                }, toy.lastSpeed * 10, toy_icons[toy.name]);
+                    toy.setSpeed(roundedPercent / 5); //0-20
+                }, ((float)toy.lastSpeed)  / 20, toy_icons[toy.name]);
         }
 
         private static void EdgeRadials(Toy toy) {
@@ -142,11 +139,8 @@ namespace Vibrator_Controller {
                 f =>
                 {
                     int roundedPercent = (int) Math.Round(f * 100);
-
-                    if (toy.lastEdgeSpeed != roundedPercent / 10) {
-                        toy.setEdgeSpeed(roundedPercent / 10);
-                    }
-                }, toy.lastEdgeSpeed * 10, toy_icons[toy.name]);
+                    toy.setEdgeSpeed(roundedPercent / 5); //0-20
+                }, ((float)toy.lastEdgeSpeed) / 20, toy_icons[toy.name]);
         }
 
         private static void MaxRadials(Toy toy) {
@@ -159,7 +153,7 @@ namespace Vibrator_Controller {
                     if (toy.contraction != contractionLevel) {
                         toy.setContraction(contractionLevel);
                     }
-                }, toy.lastSpeed * 10, toy_icons[toy.name]);
+                }, ((float)toy.lastSpeed / 20), toy_icons[toy.name]);
         }
 
         private static void NoraRadials(Toy toy) {
@@ -172,7 +166,7 @@ namespace Vibrator_Controller {
         // See with gompo#6956 if he found anything interesting for that
 
         private static void PercentageMenu(Toy toy, int purcent, Texture2D logo = null) {
-            actionMenuApi.AddPedalToCustomMenu(() => { toy.setSpeed(purcent / 10); }, "", logo);
+            actionMenuApi.AddPedalToCustomMenu(() => { toy.setSpeed(purcent / 5); }, "", logo);
         }
     }
 }

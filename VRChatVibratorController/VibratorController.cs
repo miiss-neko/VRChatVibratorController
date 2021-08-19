@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.1", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.8", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonOptionalDependencies("UIExpansionKit")]
 
@@ -44,6 +44,7 @@ namespace Vibrator_Controller
 
         public override void OnApplicationStart()
         {
+            MelonCoroutines.Start(UiManagerInitializer());
             Instance = this;
             try
             {
@@ -105,8 +106,9 @@ namespace Vibrator_Controller
             }));
         }
 
-        public override void VRChat_OnUiManagerInit()
-        {
+        public IEnumerator UiManagerInitializer() {
+            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
+
             if (subMenu != "UIExpansionKit")
             {
                 ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
@@ -184,6 +186,7 @@ namespace Vibrator_Controller
                     }
                     else
                     {
+                        Client.currentlyConnectedCode = text;
                         Client.send("join " + text);
                     }
                 });
@@ -261,7 +264,6 @@ namespace Vibrator_Controller
                 }
                 else
                 {
-                    int speed = 0;
                     if (lockSpeed) return;
                     if (holdButton != KeyCode.None && !pauseControl)
                         if (!Input.GetKey(holdButton))
@@ -269,8 +271,8 @@ namespace Vibrator_Controller
                             toy.setSpeed(0);
                             return;
                         }
-                    int left = (int)(10 * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
-                    int right = (int)(10 * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
+                    int left = (int)(20 * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
+                    int right = (int)(20 * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
 
                     if (pauseControl)
                     {
@@ -285,21 +287,23 @@ namespace Vibrator_Controller
                     switch (toy.hand)
                     {
                         case "left":
-                            speed = left;
+                            right = left;
                             break;
                         case "right":
-                            speed = right;
+                            left = right;
                             break;
                         case "either":
-                            if (left > right) speed = left;
-                            else speed = right;
+                            if (left > right) right = left;
+                            else left = right;
                             break;
                         case "both":
-                            speed = left;
-                            toy.setEdgeSpeed(right);
                             break;
                     }
-                    toy.setSpeed(speed);
+                    if (toy.name == "Edge")
+                    {
+                        toy.setEdgeSpeed(right);
+                    }
+                    toy.setSpeed(left);
                 }
             }
         }
